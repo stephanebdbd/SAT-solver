@@ -4,9 +4,18 @@ from pysat.formula import IDPool
 
 
 def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
+    # vpool.id(('move', t, p, s)):
+    # vpool.id(('trip_start', t, s)):
+    # vpool.id(('trip_duration', t, d)):
+    # vpool.id(('at_A', t, p)):
+    # vpool.id(('boat_at_A', t)):
+    
     vpool = IDPool()
+    possible_durations = list(set(durations))
+
     with Solver(name='g3') as s:
         #vaiarbles
+        
         #contraintes
         #calculs
         if s.solve():
