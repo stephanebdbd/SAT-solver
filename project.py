@@ -4,18 +4,19 @@ from pysat.formula import IDPool
 
 
 def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
-    # vpool.id(('move', t, p, s)):
-    # vpool.id(('trip_start', t, s)):
-    # vpool.id(('trip_duration', t, d)):
-    # vpool.id(('at_A', t, p)):
-    # vpool.id(('boat_at_A', t)):
-    
     vpool = IDPool()
     possible_durations = list(set(durations))
 
     with Solver(name='g3') as s:
-        #vaiarbles
-        
+        #variables
+        for t in range(T):
+            for p in range(len(durations)):
+                for s in range(c):
+                    s.add(vpool.id(('dep', t, p, s))) # 1 si il y a un d´epart de la barque a l’instant t qui contient la poule p et de type s
+                    s.add(vpool.id(('dur', t, d))) # 1 si depart a l'intant t et durrée = max des poules
+                    s.add(vpool.id(('A', p, t))) # 1 si la poule p est en A
+                    s.add(vpool.id(('side', t))) # 1 si le bateau est a A
+                    s.add(vpool.id(('ALL', t))) # 1 si les toutes les poules sont en B
         #contraintes
         #calculs
         if s.solve():
