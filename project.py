@@ -15,8 +15,10 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
                     s.add(vpool.id(('dep', t, p, s))) # 1 si il y a un d´epart de la barque a l’instant t qui contient la poule p et de type s
                     s.add(vpool.id(('dur', t, d))) # 1 si depart a l'intant t et durrée = max des poules
                     s.add(vpool.id(('A', p, t))) # 1 si la poule p est en A
-                    s.add(vpool.id(('side', t))) # 1 si le bateau est a A
+                    s.add(vpool.id(('B', p, t))) # 1 si la poule p est en B
                     s.add(vpool.id(('ALL', t))) # 1 si les toutes les poules sont en B
+                    s.add(vpool.id(('BA', t))) # 1 si le bateau est a A
+                    s.add(vpool.id(('BR', t))) # 1 si le bateau est a B
         #contraintes
         #calculs
         if s.solve():
