@@ -12,8 +12,8 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
     # --- 1. INITIALISATION (t=0) ---
     for p in range(N):
         cnf.append([vpool.id(('x', p, 'A', 0))])
-    cnf.append([vpool.id('boat_A_0')])
-    cnf.append([-vpool.id('boat_B_0')])
+    cnf.append([vpool.id(('boat_at_A', 0))])
+    cnf.append([-vpool.id(('boat_at_B', 0))])
 
     # --- 2. CONTRAINTES GLOBALES ---
     for t in range(T + 1): 
@@ -54,8 +54,8 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
             var_x_BA_next  = vpool.id(('x', p, 'BA', t+1))
             var_x_BR_next  = vpool.id(('x', p, 'BR', t+1))
 
-            p_embarque     = vpool.id(f'embarque_{p}_{t}')
-            p_embarque_R   = vpool.id(f'embarque_R_{p}_{t}')
+            p_embarque     = vpool.id(('embarque', p, t))
+            p_embarque_R   = vpool.id(('embarque_R', p, t))
 
             # Inertie
             cnf.append([-var_x_A, var_x_A_next, var_x_BA_next, var_x_B_next])
@@ -70,10 +70,11 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
             
             # Transitions & Safety Locks (Retour)
             cnf.append([-var_x_B, -var_x_BR_next, p_embarque_R])
+            # GUARD B->A direct
             cnf.append([-var_x_B, -var_x_A_next, p_embarque_R])
+            # ET embarque_R IMPLIQUE x_B
             cnf.append([-p_embarque_R, var_x_B])
 
-            # Embarque implique Départ existant
             if departs_Aller: cnf.append([-p_embarque] + departs_Aller)
             else: cnf.append([-p_embarque])
             
@@ -86,8 +87,8 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
 
 
         # --- INERTIE BATEAU ---
-        b_now = vpool.id(f'boat_A_{t}')
-        b_next = vpool.id(f'boat_A_{t+1}')
+        b_now = vpool.id(('boat_at_A', t))
+        b_next = vpool.id(('boat_at_A', t+1))
         arrivals_Retour = []
         for d in possible_durations:
              st = t + 1 - d
@@ -114,11 +115,11 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
             
             cnf.append([-var_dep_A, b_now]) 
             cnf.append([-var_dep_A, -b_next]) 
-            cnf.append([-var_dep_A, vpool.id(f'boat_B_{t+d}')]) 
+            cnf.append([-var_dep_A, vpool.id(('boat_at_B', t+d))]) 
             
             passengers = []
             for p in range(N):
-                p_emb = vpool.id(f'embarque_{p}_{t}')
+                p_emb = vpool.id(('embarque', p, t))
                 passengers.append(p_emb)
                 
                 if durations[p] > d: cnf.append([-var_dep_A, -p_emb])
@@ -142,14 +143,14 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
 
             # RETOUR
             var_dep_R = vpool.id(('depart', t, d, 'Retour'))
-            b_B_now = vpool.id(f'boat_B_{t}')
+            b_B_now = vpool.id(('boat_at_B', t))
             cnf.append([-var_dep_R, b_B_now])
-            cnf.append([-var_dep_R, -vpool.id(f'boat_B_{t+1}')])
-            cnf.append([-var_dep_R, vpool.id(f'boat_A_{t+d}')])
+            cnf.append([-var_dep_R, -vpool.id(('boat_at_B', t+1))])
+            cnf.append([-var_dep_R, vpool.id(('boat_at_A', t+d))])
             
             passengers_R = []
             for p in range(N):
-                p_emb_R = vpool.id(f'embarque_R_{p}_{t}')
+                p_emb_R = vpool.id(('embarque_R', p, t))
                 passengers_R.append(p_emb_R)
                 if durations[p] > d: cnf.append([-var_dep_R, -p_emb_R])
                 
@@ -177,13 +178,17 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
             for d in possible_durations:
                 if vpool.id(('depart', t, d, 'Aller')) in model:
                     chickens = []
+                    # Reconstruction robuste via les variables embarque
                     for p in range(N):
-                        if vpool.id(f'embarque_{p}_{t}') in model: chickens.append(p + 1)
+                        if vpool.id(('embarque', p, t)) in model:
+                            chickens.append(p + 1)
                     if chickens: solution.append((t, chickens))
-                if vpool.id(('depart', t, d, 'Retour')) in model:
+                
+                elif vpool.id(('depart', t, d, 'Retour')) in model:
                     chickens = []
                     for p in range(N):
-                        if vpool.id(f'embarque_R_{p}_{t}') in model: chickens.append(p + 1)
+                        if vpool.id(('embarque_R', p, t)) in model:
+                            chickens.append(p + 1)
                     if chickens: solution.append((t, chickens))
         return solution
     return None
