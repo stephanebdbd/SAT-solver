@@ -176,20 +176,20 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
                 # t+d : La poule arrive en 'B'
                 cnf.append([-var_dep_A, -p_emb, vpool.id(('x', p, 'B', t+d))])
             
-            # Le bateau ne part pas vide
+            # le bateau ne part pas vide
             cnf.append([-var_dep_A] + passengers)
             
-            # Capacité Max C
+            # capacité max C
             cnf.extend(CardEnc.atmost(lits=passengers, bound=c, vpool=vpool))
 
-            # Pas d'autre départ pendant le trajet
+            # pas d'autre depart pendant le trajet
             for k in range(1, d):
                 if t + k < T:
                     for d2 in possible_durations:
                         cnf.append([-var_dep_A, -vpool.id(('depart', t+k, d2, 'Aller'))])
                         cnf.append([-var_dep_A, -vpool.id(('depart', t+k, d2, 'Retour'))])
 
-            # départ retour (B -> A en d minutes)
+            # départ retour (B -> A en d minute)
             var_dep_R = vpool.id(('depart', t, d, 'Retour'))
             b_B_now = vpool.id(('boat_at_B', t))
             
@@ -227,7 +227,7 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
         solution = []
         for t in range(T):
             for d in possible_durations:
-                # si un Départ Aller est trouvé
+                # si un départ aller est trouvé
                 if vpool.id(('depart', t, d, 'Aller')) in model:
                     poules = []
                     #on identifie les passagers grâce aux variables helpers 'embarque'
@@ -236,7 +236,7 @@ def gen_solution(durations: list[int], c: int, T: int) -> None | list[tuple]:
                             poules.append(p + 1)
                     if poules: solution.append((t, poules))
                 
-                # si un Départ Retour est trouvé
+                # si un départ retour est trouvé
                 elif vpool.id(('depart', t, d, 'Retour')) in model:
                     poules = []
                     for p in range(N):
