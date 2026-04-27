@@ -64,7 +64,7 @@ For more details on the implementation, algorithm complexity, and design choices
 
 ## 👥 Authors
 
-* **Stéphane Badi Budu** - [stephanebdbd](https://www.google.com/search?q=https://github.com/stephanebdbd)
+* **Stéphane Badi Budu** - [stephanebdbd](https://github.com/stephanebdbd)
 * **Pietro NARCISI**
 * **Nicolas NGANDO NGENA**
 
